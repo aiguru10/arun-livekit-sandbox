@@ -1,176 +1,223 @@
-# Arun LiveKit Sandbox - Electron Application
+# Arun LiveKit Sandbox
 
-Complete setup instructions for cloning and running this Electron application from scratch.
+Complete LiveKit application with Python agent backend and React/Electron frontend.
+
+## Architecture Overview
+
+This project consists of three components that work together:
+1. **Python Agent** (`agent-starter-python/`) - LiveKit voice AI agent backend
+2. **React Web App** (`agent-starter-react/`) - Next.js web interface  
+3. **Electron Wrapper** - Desktop application that wraps the React app
 
 ## Prerequisites
 
-### 1. Install Node.js and npm
-- Download and install Node.js (version 16 or higher) from [nodejs.org](https://nodejs.org/)
-- This automatically installs npm (Node Package Manager)
-- Verify installation:
-  ```bash
-  node --version
-  npm --version
-  ```
+### 1. Install Python (3.9+)
+```bash
+python --version  # Should be 3.9 or higher
+```
+Download from [python.org](https://python.org) if needed.
 
-### 2. Install Git
-- Download and install Git from [git-scm.com](https://git-scm.com/)
-- Verify installation:
-  ```bash
-  git --version
-  ```
+### 2. Install Node.js (18+) and pnpm
+```bash
+node --version   # Should be 18 or higher
+npm install -g pnpm
+pnpm --version
+```
+Download Node.js from [nodejs.org](https://nodejs.org) if needed.
 
-### 3. Code Editor (Optional but Recommended)
-- Install [Visual Studio Code](https://code.visualstudio.com/) or your preferred code editor
+### 3. Install Git
+```bash
+git --version
+```
+Download from [git-scm.com](https://git-scm.com) if needed.
 
 ## Setup Instructions
 
-### Step 1: Clone the Repository
+### Step 1: Clone Repository
 ```bash
 git clone https://github.com/aiguru10/arun-livekit-sandbox.git
 cd arun-livekit-sandbox
 ```
 
-### Step 2: Install Dependencies
+### Step 2: Setup Python Agent
 ```bash
-npm install
+cd agent-starter-python
+
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -e .
+
+# Copy environment file and configure
+cp .env.example .env
+# Edit .env with your LiveKit credentials:
+# LIVEKIT_URL=wss://your-livekit-server.com
+# LIVEKIT_API_KEY=your-api-key  
+# LIVEKIT_API_SECRET=your-api-secret
 ```
 
-### Step 3: Install Electron (if not included in dependencies)
+### Step 3: Setup React/Electron App
 ```bash
-npm install electron --save-dev
+cd ../agent-starter-react
+
+# Install dependencies
+pnpm install
+
+# Copy environment file and configure
+cp .env.example .env.local
+# Edit .env.local with your LiveKit credentials:
+# LIVEKIT_URL=wss://your-livekit-server.com
+# LIVEKIT_API_KEY=your-api-key
+# LIVEKIT_API_SECRET=your-api-secret
 ```
 
-### Step 4: Install LiveKit Dependencies
+## Running the Application
+
+You need to run **all three components** in separate terminals:
+
+### Terminal 1: Start Python Agent
 ```bash
-npm install livekit-client livekit-server-sdk
+cd agent-starter-python
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+python src/agent.py
+```
+**Wait for**: "Agent started successfully" message
+
+### Terminal 2: Start React Web App
+```bash
+cd agent-starter-react
+pnpm dev
+```
+**Wait for**: "Ready - started server on 0.0.0.0:3000"
+
+### Terminal 3: Start Electron Desktop App
+```bash
+cd agent-starter-react
+pnpm run electron
 ```
 
-### Step 5: Environment Setup
-1. Create a `.env` file in the root directory:
-   ```bash
-   touch .env
-   ```
-
-2. Add your LiveKit configuration to `.env`:
-   ```
-   LIVEKIT_URL=wss://your-livekit-server.com
-   LIVEKIT_API_KEY=your-api-key
-   LIVEKIT_API_SECRET=your-api-secret
-   ```
-
-### Step 6: Build and Run the Application
-
-#### Development Mode
+## Alternative: One-Command Development
 ```bash
-npm run dev
+cd agent-starter-react
+pnpm run electron-dev
 ```
-or
-```bash
-npm start
-```
-
-#### Production Build
-```bash
-npm run build
-npm run electron
-```
+This automatically starts the web app and Electron together (Python agent must still run separately).
 
 ## Project Structure
 ```
 arun-livekit-sandbox/
-├── src/
-│   ├── main/           # Electron main process
-│   ├── renderer/       # Electron renderer process
-│   └── shared/         # Shared utilities
-├── package.json        # Project dependencies and scripts
-├── .env               # Environment variables (create this)
-└── README.md          # This file
-```
-
-## Common Scripts
-- `npm start` - Start the application in development mode
-- `npm run dev` - Start with hot reload
-- `npm run build` - Build for production
-- `npm run test` - Run tests
-- `npm run lint` - Run code linting
-
-## Troubleshooting
-
-### Permission Issues (macOS/Linux)
-If you encounter permission errors:
-```bash
-sudo npm install -g electron
-```
-
-### Windows-Specific Issues
-- Ensure you're running Command Prompt or PowerShell as Administrator
-- If you encounter build errors, install Windows Build Tools:
-  ```bash
-  npm install --global windows-build-tools
-  ```
-
-### Node Version Issues
-If you encounter compatibility issues:
-```bash
-nvm install 18
-nvm use 18
-```
-
-### Clear Cache (if installation fails)
-```bash
-npm cache clean --force
-rm -rf node_modules
-npm install
+├── agent-starter-python/          # Python LiveKit agent
+│   ├── src/agent.py               # Main agent code
+│   ├── pyproject.toml             # Python dependencies
+│   └── .env                       # Python environment config
+├── agent-starter-react/           # React/Electron frontend
+│   ├── app/                       # Next.js pages
+│   ├── components/                # React components
+│   ├── main.js                    # Electron main process
+│   ├── package.json               # Node.js dependencies
+│   └── .env.local                 # React environment config
+├── livekit.md                     # LiveKit documentation
+└── electron-implementation-plan.md # Implementation details
 ```
 
 ## LiveKit Configuration
 
-### Getting LiveKit Credentials
+### Get LiveKit Credentials
 1. Sign up at [LiveKit Cloud](https://cloud.livekit.io/)
 2. Create a new project
-3. Copy your API Key and Secret from the project settings
-4. Update your `.env` file with the credentials
+3. Copy API Key and Secret from project settings
+4. Update both `.env` files with the same credentials
 
-### Testing Connection
-The application will automatically test the LiveKit connection on startup. Check the console for connection status.
+### Environment Variables
+Both `agent-starter-python/.env` and `agent-starter-react/.env.local` need:
+```
+LIVEKIT_URL=wss://your-project-name-12345678.livekit.cloud
+LIVEKIT_API_KEY=APIxxxxxxxxxxxxx
+LIVEKIT_API_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
 
 ## Development Workflow
 
-1. Make your changes in the `src/` directory
-2. The application will hot-reload automatically in development mode
-3. Test your changes thoroughly
-4. Build for production when ready to distribute
+1. **Start Python agent first** - This connects to LiveKit and waits for sessions
+2. **Start React web app** - This provides the user interface
+3. **Start Electron** - This wraps the web app as a desktop application
+4. **Test the connection** - Open the Electron app and verify LiveKit connection
 
-## Building for Distribution
+## Production Build
 
-### macOS
+### Build React App
 ```bash
-npm run build:mac
+cd agent-starter-react
+pnpm build
 ```
 
-### Windows
+### Package Electron App
 ```bash
-npm run build:win
+# macOS
+pnpm run build:mac
+
+# Windows  
+pnpm run build:win
+
+# Linux
+pnpm run build:linux
 ```
 
-### Linux
+### Deploy Python Agent
 ```bash
-npm run build:linux
+cd agent-starter-python
+docker build -t livekit-agent .
+docker run -e LIVEKIT_URL=$LIVEKIT_URL -e LIVEKIT_API_KEY=$LIVEKIT_API_KEY -e LIVEKIT_API_SECRET=$LIVEKIT_API_SECRET livekit-agent
 ```
+
+## Troubleshooting
+
+### Python Issues
+```bash
+# If pip install fails
+pip install --upgrade pip setuptools wheel
+
+# If virtual environment issues
+rm -rf .venv
+python -m venv .venv
+```
+
+### Node.js Issues
+```bash
+# If pnpm install fails
+pnpm cache clean
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+
+# If Electron fails to start
+pnpm rebuild electron
+```
+
+### Connection Issues
+1. Verify all three components are running
+2. Check LiveKit credentials in both `.env` files
+3. Ensure Python agent connects before starting React app
+4. Check browser console for errors in Electron app
+
+## Common Scripts
+
+### Python Agent
+- `python src/agent.py` - Start the agent
+- `pytest` - Run tests
+
+### React/Electron App  
+- `pnpm dev` - Start web app in development
+- `pnpm build` - Build for production
+- `pnpm electron` - Start Electron with built app
+- `pnpm electron-dev` - Start web app + Electron together
 
 ## Support
 
-If you encounter any issues:
-1. Check the console for error messages
-2. Verify all dependencies are installed correctly
-3. Ensure your LiveKit credentials are valid
-4. Check the [LiveKit documentation](https://docs.livekit.io/)
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+If you encounter issues:
+1. Ensure all prerequisites are installed
+2. Verify LiveKit credentials are correct in both `.env` files
+3. Check that Python agent starts successfully before React app
+4. Review console logs in all three terminals
+5. Check [LiveKit documentation](https://docs.livekit.io/)
